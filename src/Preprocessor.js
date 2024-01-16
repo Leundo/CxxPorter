@@ -280,6 +280,11 @@ function diveToProprocessProtobuf(basePath, packageName) {
 
 
 module.exports = {
+    gatherIncRecords,
+    preprocess,
     diveToProprocessAbseil,
     diveToProprocessProtobuf,
+    protobufLineConverter,
+    protobufGuideFilter,
+    protobufContentModifier,
 }

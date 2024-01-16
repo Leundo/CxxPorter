@@ -14,6 +14,17 @@ const { FileGuide } = require('./src/FileManager.js');
 const descriptors = preprocessor.diveToProprocessProtobuf(constant.protobufSourcePath, 'CppProtobuf');
 const graph = porter.buildDependenceGraph(descriptors);
 
+const dependences = helper.unique(descriptors.reduce(
+    (accumulator, currentValue) => {
+        return accumulator.concat(currentValue.dependences);
+    },
+    [],
+).filter((dependence) => {
+    return dependence.pathItems[0] === 'absl';
+}).map((dependence) => {
+    return dependence.pathItems.join('/');
+}));
+console.log(dependences)
 
 const urls = [
     'google/protobuf/port_def',
