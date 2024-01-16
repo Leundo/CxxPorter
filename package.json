@@ -1,0 +1,8 @@
+{
+  "name": "CxxPorter",
+  "version": "1.0.0",
+  "description": "Using Cxx open source projects in Xcode (so as a package for iOS development)",
+  "main": "index.js",
+  "author": "Leundo",
+  "license": "MIT"
+}
