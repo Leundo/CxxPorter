@@ -215,14 +215,18 @@ function protobufLineConverter(packageName, guide, dependence, incRecords, origi
     if (dependence === null) {
         return originalText.replace(/absl::optional/g, 'std::optional');
     }
-    const thisFunction = abseilLineConverter;
+    const thisFunction = protobufLineConverter;
     if (!dependence.isQuoted) {
         return originalText;
     }
 
     if (['.h', '.hpp'].includes(dependence.extname)) {
         if (['.h', '.hpp', '.inc', 'inl'].includes(guide.extname)) {
-            return `#include <${packageName}/${dependence.pathItems.join('_')}.hpp>`;
+            if (dependence.pathItems[0] === 'absl') {
+                return `#include <CppAbseil/${dependence.pathItems.join('_')}.hpp>`;
+            } else {
+                return `#include <${packageName}/${dependence.pathItems.join('_')}.hpp>`;
+            }
         } else if (['.c', '.cxx', '.cpp', '.cc'].includes(guide.extname)) {
             if (dependence.pathItems[0].startsWith('utf8')) {
                 return `#include "utf8range_${dependence.pathItems.join('_')}.hpp"`;
@@ -271,7 +275,7 @@ function diveToProprocessAbseil(basePath, packageName) {
  * @returns {CxxDescriptor[]}
  */
 function diveToProprocessProtobuf(basePath, packageName) {
-    return diveToProprocess(basePath, packageName, abseilGuideFilter, abseilLineConverter, abseilContentModifier);
+    return diveToProprocess(basePath, packageName, protobufGuideFilter, protobufLineConverter, protobufContentModifier);
 }
 
 

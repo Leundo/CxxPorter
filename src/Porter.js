@@ -113,10 +113,10 @@ function generatorNodeFile(basePath, packageName, prefix, descriptors, node) {
     }
     note += '```\n';
 
-    note += '\n\n\n# File List\n\n'
-    for (const descriptor of targetDescriptors) {
-        note += `${descriptor.guide.dirItems.join('/')}/${descriptor.guide.filename}${descriptor.guide.extname}\n`;
-    }
+    // note += '\n\n\n# File List\n\n'
+    // for (const descriptor of targetDescriptors) {
+    //     note += `${descriptor.guide.dirItems.join('/')}/${descriptor.guide.filename}${descriptor.guide.extname}\n`;
+    // }
 
     fs.writeFileSync(path.resolve(basePath, `Node.txt`), note, {encoder: 'utf8'});
 

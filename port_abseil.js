@@ -17,8 +17,12 @@ const graph = porter.buildDependenceGraph(descriptors);
 // console.log(graph.get('/Users/leundo/Swifter/Apps/KotodamaWorkshop/CxxPorter/source/abseil_20230802_1/absl/algorithm/algorithm.h'))
 
 const urls = [
-    'absl/log/absl/check',
+    'absl/log/absl_check',
+    'absl/log/absl_log',
+    'absl/log/die_if_null',
+    'absl/log/log',
 
+    
     'absl/hash_hash',
 
     'absl/strings/string_view',
@@ -29,6 +33,17 @@ const urls = [
     'absl/strings/str_join',
     'absl/strings/numbers',
     'absl/strings/match',
+    'absl/strings/cord',
+
+    'absl/debugging/internal/stacktrace_aarch64-inl',
+    'absl/debugging/internal/stacktrace_arm-inl',
+    'absl/debugging/internal/stacktrace_emscripten-inl',
+    'absl/debugging/internal/stacktrace_generic-inl',
+    'absl/debugging/internal/stacktrace_powerpc-inl',
+    'absl/debugging/internal/stacktrace_riscv-inl',
+    'absl/debugging/internal/stacktrace_unimplemented-inl',
+    'absl/debugging/internal/stacktrace_win32-inl',
+    'absl/debugging/internal/stacktrace_x86-inl',
 
     'absl/numeric/int128',
 
@@ -52,6 +67,24 @@ const urls = [
     'absl/types/span',
     'absl/types/optional',
     'absl/types/any',
+
+    'absl/crc/crc32c',
+    'absl/crc/internal/crc_x86_arm_combined',
+    'absl/crc/internal/crc_memcpy_fallback',
+
+    'absl/status/status',
+    
+    'absl/container/btree_map',
+    'absl/container/btree_set',
+    'absl/container/flat_hash_map',
+    'absl/container/flat_hash_set',
+    'absl/container/inlined_vector',
+    'absl/container/node_hash_set',
+    'absl/container/node_hash_map',
+    'absl/container/internal/hashtablez_sampler_force_weak_definition',
+
+    'absl/synchronization/mutex'
+    
 ];
 const node = porter.findMinimalDependencyGraph(descriptors, urls, graph);
 porter.generatorNodeFile(constant.abseilOutputPath, 'CppAbseil', '', descriptors, node);
