@@ -20,7 +20,7 @@ function transformProto(records) {
     let guides = fileManager.dive(constant.protoPath);
     const descriptors = guides.filter(preprocessor.protobufGuideFilter).map((guide) => {
         return preprocessor.preprocess(guide, records, (guide, dependence, incRecords, originalText) => {
-            return preprocessor.protobufLineConverter('', guide, dependence, incRecords, originalText);
+            return preprocessor.protobufLineConverter('CppProtobuf', guide, dependence, incRecords, originalText);
         }, preprocessor.protobufContentModifier);
     });
     

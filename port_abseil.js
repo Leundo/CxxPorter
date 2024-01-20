@@ -14,8 +14,6 @@ const { FileGuide } = require('./src/FileManager.js');
 const descriptors = preprocessor.diveToProprocessAbseil(constant.abseilSourcePath, 'CppAbseil');
 const graph = porter.buildDependenceGraph(descriptors);
 
-// console.log(graph.get('/Users/leundo/Swifter/Apps/KotodamaWorkshop/CxxPorter/source/abseil_20230802_1/absl/algorithm/algorithm.h'))
-
 const urls = [
     'absl/log/absl_check',
     'absl/log/absl_log',

@@ -55,21 +55,29 @@ function buildDependenceGraph(descriptors, shouldIgnoreExtname = true, shouldInc
 /**
  * 
  * @param {CxxDescriptor[]} descriptors 
+ * @param {String[]|null} urls 
  * @param {Map<String, Set<String>>} graph 
  * @returns {Node}
  */
 function findMinimalDependencyGraph(descriptors, urls, graph) {
-    let subKeys = new Set(descriptors.filter((descriptor) => {
-        for (const url of urls) {
-            const parsed = path.parse(url);
-            if (descriptor.guide.dirItems.join('/') === parsed.dir && descriptor.guide.filename === parsed.name) {
-                return true;
+    let subKeys;
+    if (urls == null) {
+        subKeys = new Set(descriptors.map((descriptor) => {
+            return descriptor.getId();
+        }));
+    } else {
+        subKeys = new Set(descriptors.filter((descriptor) => {
+            for (const url of urls) {
+                const parsed = path.parse(url);
+                if (descriptor.guide.dirItems.join('/') === parsed.dir && descriptor.guide.filename === parsed.name) {
+                    return true;
+                }
             }
-        }
-        return false;
-    }).map((descriptor) => {
-        return descriptor.getId();
-    }));
+            return false;
+        }).map((descriptor) => {
+            return descriptor.getId();
+        }));
+    }
     
     let subKeyCount = subKeys.size;
     do {

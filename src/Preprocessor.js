@@ -131,6 +131,21 @@ function protobufGuideFilter(guide) {
     return true;
 }
 
+/**
+ * 
+ * @param {FileGuide} guide 
+ * @returns {Bool}
+ */
+function flatbuffersGuideFilter(guide) {
+    if (!['.c', '.cxx', '.cpp', '.cc', '.h', '.hpp', '.inl', '.inc'].includes(guide.extname)) {
+        return false;
+    }
+    if (guide.filename.endsWith('_test') || guide.filename.endsWith('_benchmark')) {
+        return false;
+    }
+    return true;
+}
+
 
 /**
  * 
@@ -151,6 +166,16 @@ function abseilContentModifier(content) {
  * @returns {String}
  */
 function protobufContentModifier(content) {
+    return content;
+}
+
+
+/**
+ * 
+ * @param {String} content 
+ * @returns {String}
+ */
+function flatbuffersContentModifier(content) {
     return content;
 }
 
@@ -259,6 +284,53 @@ function protobufLineConverter(packageName, guide, dependence, incRecords, origi
 
 /**
  * 
+ * @param {String} packageName 
+ * @param {FileGuide} guide 
+ * @param {Dependence|null} dependence
+ * @param {IncRecord[]} incRecords 
+ * @param {String} originalText 
+ * @returns {String}
+ */
+function flatbuffersLineConverter(packageName, guide, dependence, incRecords, originalText) {
+    if (dependence === null) {
+        return originalText;
+    }
+    const thisFunction = abseilLineConverter;
+    if (!dependence.isQuoted) {
+        return originalText;
+    }
+
+    if (['.h', '.hpp'].includes(dependence.extname)) {
+        if (['.h', '.hpp', '.inc', 'inl'].includes(guide.extname)) {
+            return `#include <${packageName}/${dependence.pathItems.join('_')}.hpp>`;
+        } else if (['.c', '.cxx', '.cpp', '.cc'].includes(guide.extname)) {
+            return `#include "${dependence.pathItems.join('_')}.hpp"`;
+        } else {
+            throw new Error(`Extname ${guide.extname} is invaild.`);
+        }
+    } else if (['.inc', '.inl'].includes(dependence.extname)) {
+        if (['.c', '.cxx', '.cpp', '.cc', '.h', '.hpp', '.inc', 'inl'].includes(guide.extname)) {
+            const record = incRecords.find((record) => {
+                return dependence.extname === record.guide.extname && helper.compareArray(dependence.pathItems, [...record.guide.dirItems, record.guide.filename]);
+            });
+            if (record === undefined) {
+                throw new Error(`IncRcord ${dependence.pathItems.join('/')}${dependence.extname} is not found.`);
+            }
+            record.content = preprocess(record.guide, incRecords, (guide, dependence, incRecords, originalText) => {
+                return thisFunction(packageName, guide, dependence, incRecords, originalText);
+            }).code;
+            return record.getExpandsion();
+        } else {
+            throw new Error(`Extname ${guide.extname} is invaild.`);
+        }
+    } else {
+        return originalText;
+    }
+}
+
+
+/**
+ * 
  * @param {String} basePath 
  * @param {String} packageName 
  * @returns {CxxDescriptor[]}
@@ -278,12 +350,22 @@ function diveToProprocessProtobuf(basePath, packageName) {
     return diveToProprocess(basePath, packageName, protobufGuideFilter, protobufLineConverter, protobufContentModifier);
 }
 
+/**
+ * 
+ * @param {String} basePath 
+ * @param {String} packageName 
+ * @returns {CxxDescriptor[]}
+ */
+function diveToProprocessFlatbuffers(basePath, packageName) {
+    return diveToProprocess(basePath, packageName, flatbuffersGuideFilter, flatbuffersLineConverter, flatbuffersContentModifier);
+}
 
 module.exports = {
     gatherIncRecords,
     preprocess,
     diveToProprocessAbseil,
     diveToProprocessProtobuf,
+    diveToProprocessFlatbuffers,
     protobufLineConverter,
     protobufGuideFilter,
     protobufContentModifier,
