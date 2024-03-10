@@ -6,6 +6,8 @@ const protobufSourcePath = path.resolve(__dirname, '../source/protobuf_25_2/');
 const protobufOutputPath = path.resolve(__dirname, '../build/protobuf_25_2/');
 const flatbuffersSourcePath = path.resolve(__dirname, '../source/flatbuffers_23_5_26/');
 const flatbuffersOutputPath = path.resolve(__dirname, '../build/flatbuffers_23_5_26/');
+const simdeSourcePath = path.resolve(__dirname, '../source/simde-0.8.0-rc2/');
+const simdeOutputPath = path.resolve(__dirname, '../build/simde-0.8.0-rc2/');
 
 const protoPath = path.resolve(__dirname, '../proto');
 
@@ -17,5 +19,7 @@ module.exports = {
     protobufOutputPath,
     flatbuffersSourcePath,
     flatbuffersOutputPath,
+    simdeSourcePath,
+    simdeOutputPath,
     protoPath,
 };

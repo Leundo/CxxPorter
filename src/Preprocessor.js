@@ -295,7 +295,7 @@ function flatbuffersLineConverter(packageName, guide, dependence, incRecords, or
     if (dependence === null) {
         return originalText;
     }
-    const thisFunction = abseilLineConverter;
+    const thisFunction = flatbuffersLineConverter;
     if (!dependence.isQuoted) {
         return originalText;
     }
@@ -303,6 +303,110 @@ function flatbuffersLineConverter(packageName, guide, dependence, incRecords, or
     if (['.h', '.hpp'].includes(dependence.extname)) {
         if (['.h', '.hpp', '.inc', 'inl'].includes(guide.extname)) {
             return `#include <${packageName}/${dependence.pathItems.join('_')}.hpp>`;
+        } else if (['.c', '.cxx', '.cpp', '.cc'].includes(guide.extname)) {
+            return `#include "${dependence.pathItems.join('_')}.hpp"`;
+        } else {
+            throw new Error(`Extname ${guide.extname} is invaild.`);
+        }
+    } else if (['.inc', '.inl'].includes(dependence.extname)) {
+        if (['.c', '.cxx', '.cpp', '.cc', '.h', '.hpp', '.inc', 'inl'].includes(guide.extname)) {
+            const record = incRecords.find((record) => {
+                return dependence.extname === record.guide.extname && helper.compareArray(dependence.pathItems, [...record.guide.dirItems, record.guide.filename]);
+            });
+            if (record === undefined) {
+                throw new Error(`IncRcord ${dependence.pathItems.join('/')}${dependence.extname} is not found.`);
+            }
+            record.content = preprocess(record.guide, incRecords, (guide, dependence, incRecords, originalText) => {
+                return thisFunction(packageName, guide, dependence, incRecords, originalText);
+            }).code;
+            return record.getExpandsion();
+        } else {
+            throw new Error(`Extname ${guide.extname} is invaild.`);
+        }
+    } else {
+        return originalText;
+    }
+}
+
+
+/**
+ * 
+ * @param {String} packageName 
+ * @param {FileGuide} guide 
+ * @param {Dependence|null} dependence
+ * @param {IncRecord[]} incRecords 
+ * @param {String} originalText 
+ * @returns {String}
+ */
+function simdeLineConverter(packageName, guide, dependence, incRecords, originalText) {
+    if (dependence === null) {
+        return originalText;
+    }
+    const thisFunction = simdeLineConverter;
+    if (!dependence.isQuoted) {
+        return originalText;
+    }
+
+    if (['.h', '.hpp'].includes(dependence.extname)) {
+        if (['.h', '.hpp', '.inc', 'inl'].includes(guide.extname)) {
+            pathItems = [...guide.dirItems];
+            if (dependence.pathItems.length == 0) {
+                pathItems = [];
+            } else if (dependence.pathItems[0] == '..') {
+                for (index = 0; index < dependence.pathItems.length; index++) {
+                    if (dependence.pathItems[index] == '..') {
+                        pathItems.pop();
+                    } else {
+                        pathItems = pathItems.concat([...dependence.pathItems.slice(index, dependence.pathItems.length)]);
+                        break;
+                    }
+                }
+            } else {
+                pathItems = [...dependence.pathItems];
+            }
+            
+            if (JSON.stringify(guide.dirItems) == JSON.stringify([ 'simde', 'arm', 'neon' ])) {
+                if (pathItems.length == 1) {
+                    pathItems = [ 'simde', 'arm', 'neon' ].concat(pathItems);
+                }
+            } else if (JSON.stringify(guide.dirItems) == JSON.stringify([ 'simde', 'arm', 'sve' ])) {
+                if (pathItems.length == 1) {
+                    pathItems = [ 'simde', 'arm', 'sve' ].concat(pathItems);
+                }
+            } else if (JSON.stringify(guide.dirItems) == JSON.stringify([ 'simde', 'arm' ])) {
+                pathItems = [ 'simde', 'arm' ].concat(pathItems);
+            } else if (JSON.stringify(guide.dirItems) == JSON.stringify([ 'simde', 'x86', 'avx512' ])) {
+                if (pathItems.length == 1) {
+                    pathItems = [ 'simde', 'x86', 'avx512' ].concat(pathItems);
+                }
+            } else if (JSON.stringify(guide.dirItems) == JSON.stringify([ 'simde', 'x86', 'avx512' ])) {
+                if (pathItems.length == 1) {
+                    pathItems = [ 'simde', 'x86', 'avx512' ].concat(pathItems);
+                }
+            } else if (JSON.stringify(guide.dirItems) == JSON.stringify([ 'simde', 'x86' ])) {
+                if (pathItems.length == 1) {
+                    pathItems = [ 'simde', 'x86' ].concat(pathItems);
+                }
+            } else if (JSON.stringify(guide.dirItems) == JSON.stringify([ 'simde', 'mips', 'msa' ])) {
+                if (pathItems.length == 1) {
+                    pathItems = [ 'simde', 'mips', 'msa' ].concat(pathItems);
+                }
+            } else if (JSON.stringify(guide.dirItems) == JSON.stringify([ 'simde', 'mips' ])) {
+                pathItems = [ 'simde', 'mips' ].concat(pathItems);
+            } else if (JSON.stringify(guide.dirItems) == JSON.stringify([ 'simde', 'wasm' ])) {
+                if (pathItems.length == 1) {
+                    pathItems = [ 'simde', 'wasm' ].concat(pathItems);
+                }
+            } else if (JSON.stringify(guide.dirItems) == JSON.stringify([ 'simde'])) {
+                if (pathItems.length == 1) {
+                    pathItems = ['simde'].concat(pathItems);
+                }
+            } else {
+                console.log(guide.dirItems, pathItems, dependence.pathItems);
+            }
+
+            // console.log(guide.dirItems, pathItems, dependence.pathItems);
+            return `#include <${packageName}/${pathItems.join('_')}.hpp>`;
         } else if (['.c', '.cxx', '.cpp', '.cc'].includes(guide.extname)) {
             return `#include "${dependence.pathItems.join('_')}.hpp"`;
         } else {
@@ -360,12 +464,25 @@ function diveToProprocessFlatbuffers(basePath, packageName) {
     return diveToProprocess(basePath, packageName, flatbuffersGuideFilter, flatbuffersLineConverter, flatbuffersContentModifier);
 }
 
+/**
+ * 
+ * @param {String} basePath 
+ * @param {String} packageName 
+ * @returns {CxxDescriptor[]}
+ */
+function diveToProprocessSimde(basePath, packageName) {
+    return diveToProprocess(basePath, packageName, flatbuffersGuideFilter, simdeLineConverter, flatbuffersContentModifier);
+}
+
+
+
 module.exports = {
     gatherIncRecords,
     preprocess,
     diveToProprocessAbseil,
     diveToProprocessProtobuf,
     diveToProprocessFlatbuffers,
+    diveToProprocessSimde,
     protobufLineConverter,
     protobufGuideFilter,
     protobufContentModifier,
